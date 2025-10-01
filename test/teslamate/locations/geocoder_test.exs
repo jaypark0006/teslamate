@@ -179,6 +179,21 @@ defmodule TeslaMate.Locations.GeocoderTest do
     end
   end
 
+  test "uses HTTPS proxy when configured" do
+    System.put_env("HTTPS_PROXY", "https://proxy.example:8443")
+
+    on_exit(fn -> System.delete_env("HTTPS_PROXY") end)
+
+    with_mock Tesla.Adapter.Finch,
+      call: fn %Tesla.Env{} = env, _opts ->
+        assert env.opts[:proxy] == "https://proxy.example:8443"
+
+        {:ok, %Tesla.Env{body: %{"error" => "Unable to geocode"}, headers: [], status: 200}}
+      end do
+      assert {:ok, %{display_name: "Unknown"}} = Geocoder.reverse_lookup(37.889602, 41.129182)
+    end
+  end
+
   describe "address formatting" do
     test "village aliases are ranked higher than municipality aliases" do
       with_mocks [
