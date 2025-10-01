@@ -6,6 +6,7 @@ defmodule TeslaMate.Locations.Geocoder do
   adapter Tesla.Adapter.Finch, name: TeslaMate.HTTP, receive_timeout: 30_000
 
   plug Tesla.Middleware.BaseUrl, "https://nominatim.openstreetmap.org"
+  plug Tesla.Middleware.Proxy, {:env, "HTTPS_PROXY", :https}
   plug Tesla.Middleware.Headers, [{"user-agent", "TeslaMate/#{@version}"}]
   plug Tesla.Middleware.JSON
   plug Tesla.Middleware.Logger, debug: true, log_level: &log_level/1
